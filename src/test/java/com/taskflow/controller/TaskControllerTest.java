@@ -49,11 +49,13 @@ public class TaskControllerTest {
         verify(taskService, never()).createTask(any());
     }
 
-    @Test
-    void unknownIdReturnsNotFound() throws Exception {
+    @Test 
+    void unknownIdReturnsStructuredErrorBody() throws Exception {
         when(taskService.getTask(99L)).thenReturn(Optional.empty());
 
         mockMvc.perform(get("/tasks/99"))
-            .andExpect(status().isNotFound());
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.status").value(404))
+            .andExpect(jsonPath("$.message").value("Task 99 not found"));
     }
 }

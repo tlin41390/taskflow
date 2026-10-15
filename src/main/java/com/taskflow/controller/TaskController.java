@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import com.taskflow.exception.TaskNotFoundException;
 import java.util.List;
 
 @RestController
@@ -34,23 +35,22 @@ public class TaskController {
     }
 
     @GetMapping("/tasks/{id}")
-    public ResponseEntity<Task> getTask(@PathVariable Long id) {
+    public Task getTask(@PathVariable Long id) {
         return taskService.getTask(id)
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
+            .orElseThrow(() -> new TaskNotFoundException(id));
     }
 
     @PutMapping("/tasks/{id}")
-    public ResponseEntity<Task> updateTask(@PathVariable Long id, @Valid @RequestBody UpdateTaskRequest request) {
+    public Task updateTask(@PathVariable Long id, @Valid @RequestBody UpdateTaskRequest request) {
         return taskService.updateTask(id, request.title(), request.done())
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
+            .orElseThrow(() -> new TaskNotFoundException(id));
     }
 
     @DeleteMapping("/tasks/{id}")
     public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
-        return taskService.deleteTask(id)
-            ? ResponseEntity.noContent().build()
-            : ResponseEntity.notFound().build();
+        if (!taskService.deleteTask(id)) {
+            throw new TaskNotFoundException(id);
+        }
+        return ResponseEntity.noContent().build();
     }
 }
