@@ -32,7 +32,7 @@ public class TaskControllerTest {
 
     @Test
     void listTasksReturnsWhatServiceProvides() throws Exception {
-        when(taskService.listTasks()).thenReturn(List.of(new Task("Write lesson notes")));
+        when(taskService.listTasks(null)).thenReturn(List.of(new Task("Write lesson notes")));
 
         mockMvc.perform(get("/tasks"))
             .andExpect(status().isOk())

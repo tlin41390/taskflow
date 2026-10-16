@@ -15,8 +15,8 @@ public class TaskService {
         this.taskRepository = taskRepository;
     }
 
-    public List<Task> listTasks() {
-        return taskRepository.findAll();
+    public List<Task> listTasks(Boolean done) {
+        return done == null ? taskRepository.findAll() : taskRepository.findByDone(done);
     }
 
     public Task createTask(String title) {
