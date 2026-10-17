@@ -2,7 +2,10 @@ package com.taskflow.controller;
 
 import com.taskflow.model.Task;
 import com.taskflow.service.TaskService;
+import com.taskflow.config.SecurityConfig;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.annotation.Import;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -20,8 +23,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 
 @WebMvcTest(TaskController.class)
+@Import(SecurityConfig.class)
 public class TaskControllerTest {
 
     @Autowired
@@ -40,6 +45,7 @@ public class TaskControllerTest {
     }
 
     @Test
+    @WithMockUser
     void blankTitleIsRejectedBeforeReachingService() throws Exception {
         mockMvc.perform(post("/tasks")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -57,5 +63,24 @@ public class TaskControllerTest {
             .andExpect(status().isNotFound())
             .andExpect(jsonPath("$.status").value(404))
             .andExpect(jsonPath("$.message").value("Task 99 not found"));
+    }
+
+    @Test 
+    void unauthenticatedPostIsRejected() throws Exception {
+        mockMvc.perform(post("/tasks")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"title\":\"Write lesson notes\"}"))
+            .andExpect(status().isUnauthorized());
+        
+        verify(taskService, never()).createTask(any());
+    }
+
+    @Test
+    @WithMockUser(roles = "USER")
+    void deleteRequiresAdminRole() throws Exception {
+        mockMvc.perform(delete("/tasks/1"))
+            .andExpect(status().isForbidden());
+        
+        verify(taskService, never()).deleteTask(any());
     }
 }
