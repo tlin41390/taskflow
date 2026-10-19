@@ -2,6 +2,7 @@ package com.taskflow.service;
 
 import com.taskflow.model.Task;
 import com.taskflow.repository.TaskRepository;
+import com.taskflow.client.NotificationClient;
 import org.springframework.stereotype.Service;
 import java.util.List; 
 import java.util.Optional;
@@ -10,9 +11,11 @@ import java.util.Optional;
 public class TaskService {
 
     private final TaskRepository taskRepository;
+    private final NotificationClient notificationClient;
 
-    public TaskService(TaskRepository taskRepository) {
+    public TaskService(TaskRepository taskRepository, NotificationClient notificationClient) {
         this.taskRepository = taskRepository;
+        this.notificationClient = notificationClient;
     }
 
     public List<Task> listTasks(Boolean done) {
@@ -20,7 +23,9 @@ public class TaskService {
     }
 
     public Task createTask(String title) {
-        return taskRepository.save(new Task(title));
+        Task task =  taskRepository.save(new Task(title));
+        notificationClient.notifyTaskCreated(task.getId(), task.getTitle());
+        return task;
     }
 
     public Optional<Task> getTask(Long id) {
