@@ -2,6 +2,7 @@ package com.taskflow.client;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.jms.JmsException; 
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
@@ -19,8 +20,14 @@ public class NotificationClient {
     }
 
     public void notifyTaskCreated(Long taskId, String title) {
+        String correlationId = MDC.get("correlationId");
         try {
-            jmsTemplate.convertAndSend(QUEUE, new TaskCreatedEvent(taskId, title));
+            jmsTemplate.convertAndSend(QUEUE, new TaskCreatedEvent(taskId, title), message ->{
+                if (correlationId != null) {
+                    message.setStringProperty("correlationId", correlationId);
+                }
+                return message;
+            });
         } catch (JmsException e) {
             log.warn("Failed to publish task-created event for task {}: {}", taskId, e.getMessage());
         }
