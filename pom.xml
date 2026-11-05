@@ -30,7 +30,7 @@
 	<properties>
 		<java.version>25</java.version>
 		<spring-cloud.version>2025.1.4</spring-cloud.version>
-		    <artemis.version>2.53.0</artemis.version>
+		<artemis.version>2.53.0</artemis.version>
 
 	</properties>
 
@@ -110,7 +110,21 @@
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
 		</dependency>
-		
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-zipkin</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-config</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
